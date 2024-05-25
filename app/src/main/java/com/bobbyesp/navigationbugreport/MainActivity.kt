@@ -1,6 +1,7 @@
 package com.bobbyesp.navigationbugreport
 
 import android.Manifest
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -23,14 +24,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
@@ -45,10 +50,14 @@ import com.bobbyesp.navigationbugreport.ui.common.UtilitiesNavigator
 import com.bobbyesp.navigationbugreport.ui.components.ArtworkAsyncImage
 import com.bobbyesp.navigationbugreport.ui.components.permissions.PermissionRequestHandler
 import com.bobbyesp.navigationbugreport.ui.theme.NavigationBugReportTheme
+import com.bobbyesp.navigationbugreport.util.MediaStore
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlin.reflect.typeOf
 
 class MainActivity : ComponentActivity() {
@@ -103,11 +112,21 @@ class MainActivity : ComponentActivity() {
                                                 Text(text = "This permission is required to access your audio files.")
                                             },
                                             confirmButton = {
-                                                Text(text = "OK")
+                                                TextButton(
+                                                    onClick = {
+                                                        storagePermissionState.launchPermissionRequest()
+                                                    }
+                                                ) {
+                                                    Text(text = "OK")
+                                                }
                                             }
                                         )
                                     }
                                 ) {
+                                    val context = LocalContext.current
+                                    LaunchedEffect(Unit) {
+                                        mainViewModel.loadSongs(context)
+                                    }
                                     SongsList(
                                         songs = songs,
                                         lazyListState = lazyListState,
@@ -119,7 +138,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         navigation<UtilitiesNavigator>(
-                            startDestination = SongInformationPage,
+                            startDestination = SongInformationPage::class,
                         ) {
                             composable<SongInformationPage>(
                                 typeMap = mapOf(typeOf<Song>() to ParcelableSongNavType)
@@ -159,6 +178,14 @@ class MainViewModel : ViewModel() {
     data class ViewState(
         val songs: List<Song> = emptyList()
     )
+
+    fun loadSongs(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            mutablePageViewState.update {
+                it.copy(songs = MediaStore.getDeviceSongs(context))
+            }
+        }
+    }
 }
 
 @Composable
@@ -169,8 +196,7 @@ private fun SongsList(
 ) {
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .fillMaxSize(),
         state = lazyListState,
     ) {
         items(count = songs.size,
