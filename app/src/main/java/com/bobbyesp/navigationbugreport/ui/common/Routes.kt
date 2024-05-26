@@ -4,6 +4,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import com.bobbyesp.navigationbugreport.domain.model.Song
 import kotlinx.serialization.Serializable
@@ -53,13 +55,12 @@ inline fun <reified T : Parcelable> parcelableType(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             bundle.getParcelable(key, T::class.java)
         } else {
-            @Suppress("DEPRECATION")
-            bundle.getParcelable(key)
+            @Suppress("DEPRECATION") bundle.getParcelable(key)
         }
 
     override fun parseValue(value: String): T = json.decodeFromString(value)
 
-    override fun serializeAsValue(value: T): String = json.encodeToString(value)
+    override fun serializeAsValue(value: T): String = Uri.encode(json.encodeToString(value))
 
     override fun put(bundle: Bundle, key: String, value: T) = bundle.putParcelable(key, value)
 }

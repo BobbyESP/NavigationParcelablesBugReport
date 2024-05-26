@@ -47,6 +47,7 @@ import com.bobbyesp.navigationbugreport.ui.common.MainNavigator
 import com.bobbyesp.navigationbugreport.ui.common.ParcelableSongNavType
 import com.bobbyesp.navigationbugreport.ui.common.SongInformationPage
 import com.bobbyesp.navigationbugreport.ui.common.UtilitiesNavigator
+import com.bobbyesp.navigationbugreport.ui.common.parcelableType
 import com.bobbyesp.navigationbugreport.ui.components.ArtworkAsyncImage
 import com.bobbyesp.navigationbugreport.ui.components.permissions.PermissionRequestHandler
 import com.bobbyesp.navigationbugreport.ui.theme.NavigationBugReportTheme
@@ -141,7 +142,7 @@ class MainActivity : ComponentActivity() {
                             startDestination = SongInformationPage::class,
                         ) {
                             composable<SongInformationPage>(
-                                typeMap = mapOf(typeOf<Song>() to ParcelableSongNavType)
+                                typeMap = mapOf(typeOf<Song>() to parcelableType<Song>())
                             ) {
                                 val song = it.toRoute<SongInformationPage>().song
                                 Column(
