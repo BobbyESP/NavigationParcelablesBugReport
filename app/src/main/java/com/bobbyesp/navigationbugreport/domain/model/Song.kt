@@ -50,5 +50,15 @@ data class Song(
         override fun newArray(size: Int): Array<Song?> {
             return arrayOfNulls(size)
         }
+
+        val empty = Song(
+            id = -1,
+            title = "",
+            artist = "",
+            album = "",
+            duration = 0.0,
+            path = "",
+            fileName = ""
+        )
     }
 }
