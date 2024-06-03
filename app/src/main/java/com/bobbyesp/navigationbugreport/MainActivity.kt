@@ -8,7 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,11 +41,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.bobbyesp.navigationbugreport.domain.model.Song
-import com.bobbyesp.navigationbugreport.ui.common.Home
-import com.bobbyesp.navigationbugreport.ui.common.MainNavigator
-import com.bobbyesp.navigationbugreport.ui.common.ParcelableSongNavType
-import com.bobbyesp.navigationbugreport.ui.common.SongInformationPage
-import com.bobbyesp.navigationbugreport.ui.common.UtilitiesNavigator
+import com.bobbyesp.navigationbugreport.ui.common.Route
 import com.bobbyesp.navigationbugreport.ui.common.parcelableType
 import com.bobbyesp.navigationbugreport.ui.components.ArtworkAsyncImage
 import com.bobbyesp.navigationbugreport.ui.components.permissions.PermissionRequestHandler
@@ -62,7 +57,7 @@ import kotlinx.coroutines.launch
 import kotlin.reflect.typeOf
 
 class MainActivity : ComponentActivity() {
-    val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by viewModels()
 
     @OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,12 +84,12 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                             .padding(innerPadding),
                         navController = navController,
-                        startDestination = MainNavigator,
+                        startDestination = Route.MainNavigator,
                     ) {
-                        navigation<MainNavigator>(
-                            startDestination = Home,
+                        navigation<Route.MainNavigator>(
+                            startDestination = Route.MainNavigator.Home,
                         ) {
-                            composable<Home> {
+                            composable<Route.MainNavigator.Home> {
                                 PermissionRequestHandler(
                                     permissionState = storagePermissionState,
                                     deniedContent = { shouldShowRationale ->
@@ -132,19 +127,23 @@ class MainActivity : ComponentActivity() {
                                         songs = songs,
                                         lazyListState = lazyListState,
                                         onItemClicked = { song ->
-                                            navController.navigate(SongInformationPage(song))
+                                            navController.navigate(
+                                                Route.UtilitiesNavigator.SongInformationPage(
+                                                    song
+                                                )
+                                            )
                                         }
                                     )
                                 }
                             }
                         }
-                        navigation<UtilitiesNavigator>(
-                            startDestination = SongInformationPage::class,
+                        navigation<Route.UtilitiesNavigator>(
+                            startDestination = Route.UtilitiesNavigator.SongInformationPage::class,
                         ) {
-                            composable<SongInformationPage>(
+                            composable<Route.UtilitiesNavigator.SongInformationPage>(
                                 typeMap = mapOf(typeOf<Song>() to parcelableType<Song>())
                             ) {
-                                val song = it.toRoute<SongInformationPage>().song
+                                val song = it.toRoute<Route.UtilitiesNavigator.SongInformationPage>().song
                                 Column(
                                     modifier = Modifier.fillMaxSize(),
                                     verticalArrangement = Arrangement.Center,

@@ -4,8 +4,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import com.bobbyesp.navigationbugreport.domain.model.Song
 import kotlinx.serialization.Serializable
@@ -13,21 +11,38 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Serializable
-object MainHost
+sealed interface Route {
+    @Serializable
+    data object MainHost : Route
 
-@Serializable
-object MainNavigator
+    @Serializable
+    data object MainNavigator : Route {
+        @Serializable
+        data object Home : Route
+    }
 
-@Serializable
-object Home
-
-@Serializable
-object UtilitiesNavigator
-
-@Serializable
-data class SongInformationPage(
-    val song: Song
-)
+    @Serializable
+    data object UtilitiesNavigator : Route {
+        @Serializable
+        data class SongInformationPage(val song: Song) : Route
+    }
+}
+//@Serializable
+//object MainHost
+//
+//@Serializable
+//object MainNavigator
+//
+//@Serializable
+//object Home
+//
+//@Serializable
+//object UtilitiesNavigator
+//
+//@Serializable
+//data class SongInformationPage(
+//    val song: Song
+//)
 
 val ParcelableSongNavType = object : NavType<Song>(isNullableAllowed = false) {
     override fun get(bundle: Bundle, key: String): Song? {
